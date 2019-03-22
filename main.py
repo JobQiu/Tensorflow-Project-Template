@@ -1,4 +1,5 @@
 import tensorflow as tf
+import os
 
 from data_loader.data_generator import DataGenerator
 from models.example_model import ExampleModel
@@ -18,7 +19,10 @@ def main():
 
     except:
         print("missing or invalid arguments")
-        exit(0)
+        if os.path.isfile("configs/example.json"):
+            config = process_config("configs/example.json")
+        else:
+            config = process_config("../configs/example.json")
 
     # create the experiments dirs
     create_dirs([config.summary_dir, config.checkpoint_dir])
@@ -26,14 +30,14 @@ def main():
     sess = tf.Session()
     # create your data generator
     data = DataGenerator(config)
-    
+
     # create an instance of the model you want
     model = ExampleModel(config)
     # create tensorboard logger
     logger = Logger(sess, config)
     # create trainer and pass all the previous components to it
     trainer = ExampleTrainer(sess, model, data, config, logger)
-    #load model if exists
+    # load model if exists
     model.load(sess)
     # here you train your model
     trainer.train()
